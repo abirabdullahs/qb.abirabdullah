@@ -1,0 +1,153 @@
+name: Scaffold Project Structure
+
+on:
+  workflow_dispatch:   # run manually from the Actions tab on github.com
+
+permissions:
+  contents: write
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create folders and placeholder files
+        run: |
+          set -e
+          FILES=(
+            "src/app/(public)/page.tsx"
+            "src/app/(public)/questions/page.tsx"
+            "src/app/(public)/questions/[questionId]/page.tsx"
+            "src/app/(public)/practice/[subjectId]/page.tsx"
+            "src/app/(public)/mock-tests/page.tsx"
+            "src/app/(public)/mock-tests/[setId]/page.tsx"
+            "src/app/(auth)/login/page.tsx"
+            "src/app/(auth)/register/page.tsx"
+            "src/app/(dashboard)/dashboard/layout.tsx"
+            "src/app/(dashboard)/dashboard/page.tsx"
+            "src/app/(dashboard)/dashboard/questions/page.tsx"
+            "src/app/(dashboard)/dashboard/questions/new/page.tsx"
+            "src/app/(dashboard)/dashboard/questions/[questionId]/edit/page.tsx"
+            "src/app/(dashboard)/dashboard/review/page.tsx"
+            "src/app/(dashboard)/dashboard/question-sets/page.tsx"
+            "src/app/(dashboard)/dashboard/question-sets/new/page.tsx"
+            "src/app/(dashboard)/dashboard/question-sets/[setId]/edit/page.tsx"
+            "src/app/(dashboard)/dashboard/taxonomy/subjects/page.tsx"
+            "src/app/(dashboard)/dashboard/taxonomy/chapters/page.tsx"
+            "src/app/(dashboard)/dashboard/taxonomy/topics/page.tsx"
+            "src/app/(dashboard)/dashboard/admissions/exams/page.tsx"
+            "src/app/(dashboard)/dashboard/admissions/units/page.tsx"
+            "src/app/(dashboard)/dashboard/admissions/institutes/page.tsx"
+            "src/app/api/questions/route.ts"
+            "src/app/api/questions/[questionId]/route.ts"
+            "src/app/api/question-sets/route.ts"
+            "src/app/api/upload/route.ts"
+            "src/app/api/health/route.ts"
+            "src/app/layout.tsx"
+            "src/app/error.tsx"
+            "src/app/not-found.tsx"
+            "src/app/globals.css"
+            "src/domains/academic/components/CurriculumTree.tsx"
+            "src/domains/academic/components/SubjectForm.tsx"
+            "src/domains/academic/components/ChapterForm.tsx"
+            "src/domains/academic/components/TopicForm.tsx"
+            "src/domains/academic/server/academic.service.ts"
+            "src/domains/academic/server/academic.repository.ts"
+            "src/domains/academic/server/academic.queries.ts"
+            "src/domains/academic/validations/academic.schema.ts"
+            "src/domains/academic/types/academic.types.ts"
+            "src/domains/academic/index.ts"
+            "src/domains/admission/components/AdmissionExamForm.tsx"
+            "src/domains/admission/components/ExamTypeSelector.tsx"
+            "src/domains/admission/components/ClusterUnitBuilder.tsx"
+            "src/domains/admission/components/InstituteSelector.tsx"
+            "src/domains/admission/server/admission.service.ts"
+            "src/domains/admission/server/admission.repository.ts"
+            "src/domains/admission/server/admission.queries.ts"
+            "src/domains/admission/validations/admission.schema.ts"
+            "src/domains/admission/types/admission.types.ts"
+            "src/domains/admission/constants/exam-types.ts"
+            "src/domains/admission/index.ts"
+            "src/domains/question/components/QuestionCard.tsx"
+            "src/domains/question/components/QuestionRenderer.tsx"
+            "src/domains/question/components/QuestionForm.tsx"
+            "src/domains/question/components/mcq/MCQEditor.tsx"
+            "src/domains/question/components/mcq/MCQOptionList.tsx"
+            "src/domains/question/components/cq/CQEditor.tsx"
+            "src/domains/question/components/cq/CQSubPartList.tsx"
+            "src/domains/question/components/written/WrittenEditor.tsx"
+            "src/domains/question/components/filters/QuestionFilters.tsx"
+            "src/domains/question/server/question.service.ts"
+            "src/domains/question/server/question.repository.ts"
+            "src/domains/question/server/question.queries.ts"
+            "src/domains/question/server/duplicate-hash.ts"
+            "src/domains/question/validations/question.schema.ts"
+            "src/domains/question/validations/mcq.schema.ts"
+            "src/domains/question/validations/cq.schema.ts"
+            "src/domains/question/types/question.types.ts"
+            "src/domains/question/constants/question-types.ts"
+            "src/domains/question/constants/difficulty-levels.ts"
+            "src/domains/question/constants/cq-styles.ts"
+            "src/domains/question/index.ts"
+            "src/domains/content/components/RichTextEditor.tsx"
+            "src/domains/content/components/MathEditor.tsx"
+            "src/domains/content/components/LatexRenderer.tsx"
+            "src/domains/content/utils/detect-math.ts"
+            "src/domains/content/utils/sanitize-html.ts"
+            "src/domains/content/index.ts"
+            "src/components/ui/.gitkeep"
+            "src/components/layout/.gitkeep"
+            "src/components/feedback/.gitkeep"
+            "src/lib/db/client.ts"
+            "src/lib/db/schema/academic.ts"
+            "src/lib/db/schema/admission.ts"
+            "src/lib/db/schema/questions.ts"
+            "src/lib/db/schema/attachments.ts"
+            "src/lib/db/schema/tags.ts"
+            "src/lib/db/schema/question-sets.ts"
+            "src/lib/db/schema/stats.ts"
+            "src/lib/db/schema/users.ts"
+            "src/lib/db/schema/index.ts"
+            "src/lib/db/transactions.ts"
+            "src/lib/auth/auth.ts"
+            "src/lib/auth/permissions.ts"
+            "src/lib/storage/storage.provider.ts"
+            "src/lib/storage/s3.provider.ts"
+            "src/lib/http/api-response.ts"
+            "src/lib/http/error-handler.ts"
+            "src/lib/utils/cn.ts"
+            "src/lib/utils/slugify.ts"
+            "src/lib/utils/pagination.ts"
+            "src/config/app.config.ts"
+            "src/hooks/useDebounce.ts"
+            "src/hooks/usePagination.ts"
+            "src/types/api.types.ts"
+            "db/migrations/.gitkeep"
+            "db/seeds/boards.seed.ts"
+            "db/seeds/segments.seed.ts"
+            "db/seeds/admission.seed.ts"
+            "scripts/import-questions.ts"
+            "docs/database.md"
+            ".env.example"
+            "drizzle.config.ts"
+            "next.config.ts"
+            "package.json"
+            "tsconfig.json"
+            "README.md"
+          )
+          for f in "${FILES[@]}"; do
+            mkdir -p "$(dirname "$f")"
+            if [ ! -f "$f" ]; then
+              touch "$f"
+            fi
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Scaffold project folder/file structure"
+          git push
