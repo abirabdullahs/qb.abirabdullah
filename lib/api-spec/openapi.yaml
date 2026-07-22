@@ -3,20 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Online Smart Question Bank API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: academic
+    description: Segments, groups, subjects, chapters, topics
+  - name: admission
+    description: Admission exams, institutes, units
+  - name: questions
+    description: Question management
+  - name: question-sets
+    description: Question sets and mock tests
+  - name: dashboard
+    description: Dashboard and analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +34,1094 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Academic ─────────────────────────────────────────────────────────────
+  /segments:
+    get:
+      operationId: listSegments
+      tags: [academic]
+      summary: List all segments
+      responses:
+        "200":
+          description: List of segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Segment"
+
+  /groups:
+    get:
+      operationId: listGroups
+      tags: [academic]
+      summary: List groups, optionally filtered by segment
+      parameters:
+        - name: segmentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+
+  /subjects:
+    get:
+      operationId: listSubjects
+      tags: [academic]
+      summary: List subjects
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+
+  /chapters:
+    get:
+      operationId: listChapters
+      tags: [academic]
+      summary: List chapters, optionally filtered by subject
+      parameters:
+        - name: subjectId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of chapters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chapter"
+
+  /topics:
+    get:
+      operationId: listTopics
+      tags: [academic]
+      summary: List topics, optionally filtered by chapter
+      parameters:
+        - name: chapterId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Topic"
+
+  /boards:
+    get:
+      operationId: listBoards
+      tags: [academic]
+      summary: List education boards
+      responses:
+        "200":
+          description: List of boards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Board"
+
+  # ── Admission ─────────────────────────────────────────────────────────────
+  /admission-segments:
+    get:
+      operationId: listAdmissionSegments
+      tags: [admission]
+      summary: List admission segments (Engineering, Medical, Varsity)
+      responses:
+        "200":
+          description: List of admission segments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdmissionSegment"
+
+  /institutes:
+    get:
+      operationId: listInstitutes
+      tags: [admission]
+      summary: List institutes, optionally filtered by admission segment
+      parameters:
+        - name: admissionSegmentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of institutes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Institute"
+
+  /admission-exams:
+    get:
+      operationId: listAdmissionExams
+      tags: [admission]
+      summary: List admission exams
+      parameters:
+        - name: admissionSegmentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of admission exams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdmissionExam"
+
+  /admission-units:
+    get:
+      operationId: listAdmissionUnits
+      tags: [admission]
+      summary: List units for a given admission exam
+      parameters:
+        - name: admissionExamId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of admission units
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdmissionUnit"
+
+  # ── Questions ─────────────────────────────────────────────────────────────
+  /questions:
+    get:
+      operationId: listQuestions
+      tags: [questions]
+      summary: List questions with filters
+      parameters:
+        - name: segmentId
+          in: query
+          schema:
+            type: integer
+        - name: subjectId
+          in: query
+          schema:
+            type: integer
+        - name: chapterId
+          in: query
+          schema:
+            type: integer
+        - name: topicId
+          in: query
+          schema:
+            type: integer
+        - name: questionType
+          in: query
+          schema:
+            type: string
+            enum: [MCQ, CQ, WRITTEN]
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+            enum: [easy, medium, hard]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: language
+          in: query
+          schema:
+            type: string
+            enum: [bn, en]
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated list of questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionListResponse"
+
+    post:
+      operationId: createQuestion
+      tags: [questions]
+      summary: Create a new question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /questions/{questionId}:
+    get:
+      operationId: getQuestion
+      tags: [questions]
+      summary: Get a single question by ID
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Question details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      operationId: updateQuestion
+      tags: [questions]
+      summary: Update a question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionUpdate"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteQuestion
+      tags: [questions]
+      summary: Delete a question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /questions/{questionId}/status:
+    patch:
+      operationId: updateQuestionStatus
+      tags: [questions]
+      summary: Approve or reject a question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionStatusUpdate"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+
+  # ── Question Sets ──────────────────────────────────────────────────────────
+  /question-sets:
+    get:
+      operationId: listQuestionSets
+      tags: [question-sets]
+      summary: List question sets
+      responses:
+        "200":
+          description: List of question sets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuestionSet"
+
+    post:
+      operationId: createQuestionSet
+      tags: [question-sets]
+      summary: Create a new question set
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionSetInput"
+      responses:
+        "201":
+          description: Created question set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionSet"
+
+  /question-sets/{setId}:
+    get:
+      operationId: getQuestionSet
+      tags: [question-sets]
+      summary: Get a question set with its questions
+      parameters:
+        - name: setId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Question set details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionSetDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteQuestionSet
+      tags: [question-sets]
+      summary: Delete a question set
+      parameters:
+        - name: setId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /question-sets/{setId}/items:
+    post:
+      operationId: addQuestionToSet
+      tags: [question-sets]
+      summary: Add a question to a set
+      parameters:
+        - name: setId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionSetItemInput"
+      responses:
+        "201":
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionSetDetail"
+
+  /question-sets/{setId}/items/{questionId}:
+    delete:
+      operationId: removeQuestionFromSet
+      tags: [question-sets]
+      summary: Remove a question from a set
+      parameters:
+        - name: setId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Overall question bank statistics
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-questions:
+    get:
+      operationId: getRecentQuestions
+      tags: [dashboard]
+      summary: Most recently added questions
+      responses:
+        "200":
+          description: Recent questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuestionSummary"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    # ── Academic entities ──────────────────────────────────────────────────
+    Segment:
+      type: object
+      required: [id, name, code, segmentKind, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        segmentKind:
+          type: string
+          enum: [academic, admission]
+        createdAt:
+          type: string
+
+    Group:
+      type: object
+      required: [id, segmentId, name]
+      properties:
+        id:
+          type: integer
+        segmentId:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+
+    Subject:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+
+    Chapter:
+      type: object
+      required: [id, subjectId, name, orderNo]
+      properties:
+        id:
+          type: integer
+        subjectId:
+          type: integer
+        name:
+          type: string
+        orderNo:
+          type: integer
+
+    Topic:
+      type: object
+      required: [id, chapterId, name, orderNo]
+      properties:
+        id:
+          type: integer
+        chapterId:
+          type: integer
+        name:
+          type: string
+        orderNo:
+          type: integer
+
+    Board:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+
+    # ── Admission entities ─────────────────────────────────────────────────
+    AdmissionSegment:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+
+    Institute:
+      type: object
+      required: [id, admissionSegmentId, name]
+      properties:
+        id:
+          type: integer
+        admissionSegmentId:
+          type: integer
+        name:
+          type: string
+        shortName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+
+    AdmissionExam:
+      type: object
+      required: [id, admissionSegmentId, name, examYear, examType, createdAt]
+      properties:
+        id:
+          type: integer
+        admissionSegmentId:
+          type: integer
+        name:
+          type: string
+        examYear:
+          type: integer
+        conductingBody:
+          type: ["string", "null"]
+        examType:
+          type: string
+          enum: [single_institute, cluster, centralized]
+        instituteId:
+          type: ["integer", "null"]
+        negativeMarking:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    AdmissionUnit:
+      type: object
+      required: [id, admissionExamId, unitName]
+      properties:
+        id:
+          type: integer
+        admissionExamId:
+          type: integer
+        unitName:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    # ── Question entities ──────────────────────────────────────────────────
+    QuestionOption:
+      type: object
+      required: [id, questionId, optionLabel, optionText, isCorrect, orderNo]
+      properties:
+        id:
+          type: integer
+        questionId:
+          type: integer
+        optionLabel:
+          type: string
+        optionText:
+          type: string
+        isCorrect:
+          type: boolean
+        explanationText:
+          type: ["string", "null"]
+        orderNo:
+          type: integer
+
+    QuestionSubPart:
+      type: object
+      required: [id, questionId, partLabel, partText, orderNo]
+      properties:
+        id:
+          type: integer
+        questionId:
+          type: integer
+        partLabel:
+          type: string
+        partText:
+          type: string
+        marks:
+          type: ["number", "null"]
+        cognitiveLevel:
+          type: ["string", "null"]
+        answerText:
+          type: ["string", "null"]
+        explanationText:
+          type: ["string", "null"]
+        orderNo:
+          type: integer
+
+    Question:
+      type: object
+      required: [id, segmentId, subjectId, questionType, questionText, hasMath, isPreviousYear, difficulty, language, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        segmentId:
+          type: integer
+        groupId:
+          type: ["integer", "null"]
+        admissionSegmentId:
+          type: ["integer", "null"]
+        admissionExamId:
+          type: ["integer", "null"]
+        admissionUnitId:
+          type: ["integer", "null"]
+        instituteId:
+          type: ["integer", "null"]
+        subjectId:
+          type: integer
+        chapterId:
+          type: ["integer", "null"]
+        topicId:
+          type: ["integer", "null"]
+        subTopicId:
+          type: ["integer", "null"]
+        questionType:
+          type: string
+          enum: [MCQ, CQ, WRITTEN]
+        stimulusText:
+          type: ["string", "null"]
+        questionText:
+          type: string
+        hasMath:
+          type: boolean
+        cqStyle:
+          type: ["string", "null"]
+        year:
+          type: ["integer", "null"]
+        examName:
+          type: ["string", "null"]
+        isPreviousYear:
+          type: boolean
+        marks:
+          type: ["number", "null"]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        language:
+          type: string
+          enum: [bn, en]
+        answerText:
+          type: ["string", "null"]
+        explanationText:
+          type: ["string", "null"]
+        videoSolutionUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        contributorId:
+          type: ["integer", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOption"
+        subParts:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSubPart"
+        segmentName:
+          type: ["string", "null"]
+        subjectName:
+          type: ["string", "null"]
+        chapterName:
+          type: ["string", "null"]
+
+    QuestionSummary:
+      type: object
+      required: [id, questionType, questionText, status, difficulty, language, createdAt]
+      properties:
+        id:
+          type: integer
+        questionType:
+          type: string
+          enum: [MCQ, CQ, WRITTEN]
+        questionText:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        language:
+          type: string
+          enum: [bn, en]
+        subjectName:
+          type: ["string", "null"]
+        segmentName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    QuestionListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSummary"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    QuestionOptionInput:
+      type: object
+      required: [optionLabel, optionText, isCorrect]
+      properties:
+        optionLabel:
+          type: string
+        optionText:
+          type: string
+        isCorrect:
+          type: boolean
+        explanationText:
+          type: string
+        orderNo:
+          type: integer
+
+    QuestionSubPartInput:
+      type: object
+      required: [partLabel, partText]
+      properties:
+        partLabel:
+          type: string
+        partText:
+          type: string
+        marks:
+          type: number
+        cognitiveLevel:
+          type: string
+        answerText:
+          type: string
+        explanationText:
+          type: string
+        orderNo:
+          type: integer
+
+    QuestionInput:
+      type: object
+      required: [segmentId, subjectId, questionType, questionText, language]
+      properties:
+        segmentId:
+          type: integer
+        groupId:
+          type: integer
+        admissionSegmentId:
+          type: integer
+        admissionExamId:
+          type: integer
+        admissionUnitId:
+          type: integer
+        instituteId:
+          type: integer
+        subjectId:
+          type: integer
+        chapterId:
+          type: integer
+        topicId:
+          type: integer
+        subTopicId:
+          type: integer
+        questionType:
+          type: string
+          enum: [MCQ, CQ, WRITTEN]
+        stimulusText:
+          type: string
+        questionText:
+          type: string
+        hasMath:
+          type: boolean
+        year:
+          type: integer
+        examName:
+          type: string
+        isPreviousYear:
+          type: boolean
+        marks:
+          type: number
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        language:
+          type: string
+          enum: [bn, en]
+        answerText:
+          type: string
+        explanationText:
+          type: string
+        videoSolutionUrl:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOptionInput"
+        subParts:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSubPartInput"
+
+    QuestionUpdate:
+      type: object
+      properties:
+        questionText:
+          type: string
+        stimulusText:
+          type: string
+        answerText:
+          type: string
+        explanationText:
+          type: string
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        marks:
+          type: number
+        year:
+          type: integer
+        chapterId:
+          type: integer
+        topicId:
+          type: integer
+        hasMath:
+          type: boolean
+        videoSolutionUrl:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOptionInput"
+        subParts:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSubPartInput"
+
+    QuestionStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+
+    # ── Question Set entities ──────────────────────────────────────────────
+    QuestionSet:
+      type: object
+      required: [id, name, negativeMarking, createdAt, itemCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        segmentId:
+          type: ["integer", "null"]
+        negativeMarking:
+          type: number
+        createdBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        itemCount:
+          type: integer
+
+    QuestionSetDetail:
+      type: object
+      required: [id, name, negativeMarking, createdAt, items]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        segmentId:
+          type: ["integer", "null"]
+        negativeMarking:
+          type: number
+        createdBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionSetItem"
+
+    QuestionSetItem:
+      type: object
+      required: [setId, questionId, orderNo]
+      properties:
+        setId:
+          type: integer
+        questionId:
+          type: integer
+        orderNo:
+          type: integer
+        marksOverride:
+          type: ["number", "null"]
+        question:
+          $ref: "#/components/schemas/QuestionSummary"
+
+    QuestionSetInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        segmentId:
+          type: integer
+        negativeMarking:
+          type: number
+
+    QuestionSetItemInput:
+      type: object
+      required: [questionId]
+      properties:
+        questionId:
+          type: integer
+        orderNo:
+          type: integer
+        marksOverride:
+          type: number
+
+    # ── Dashboard ──────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalQuestions, pendingQuestions, approvedQuestions, rejectedQuestions, totalSets, questionsByType, questionsByDifficulty]
+      properties:
+        totalQuestions:
+          type: integer
+        pendingQuestions:
+          type: integer
+        approvedQuestions:
+          type: integer
+        rejectedQuestions:
+          type: integer
+        totalSets:
+          type: integer
+        questionsByType:
+          type: object
+          properties:
+            MCQ:
+              type: integer
+            CQ:
+              type: integer
+            WRITTEN:
+              type: integer
+          required: [MCQ, CQ, WRITTEN]
+        questionsByDifficulty:
+          type: object
+          properties:
+            easy:
+              type: integer
+            medium:
+              type: integer
+            hard:
+              type: integer
+          required: [easy, medium, hard]
